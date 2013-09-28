@@ -1,0 +1,14 @@
+09/28/13
+
+These are objects for my Hypermedia capstone project. They'll be used with a Sinarta server. 
+
+Originally everything was scripted on the server, but it got ugly fast. 
+
+This is the official refractor, starting from the bottom up.
+
+
+Files
+------
+
+* MySQLDatabase.rb: a real data layer using the mysql2 gem
+* User: represents a person that will be accessing the API (eventually)
