@@ -28,7 +28,7 @@ class User
 		  self.username = resp[0]['username']
 		  self.auth = resp[0]['auth']
 		  self.password = resp[0]['password']
-	  end
+	    end
 	  rescue Exception => e
 		raise e.message
 	  ensure

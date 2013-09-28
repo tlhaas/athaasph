@@ -6,78 +6,78 @@ class MySQLDatabase
 	attr_accessor :host, :port, :username, :password, :database, :connection
 
 	def initialize(host='127.0.0.1', port=8889, username='root', password='root', database='athaasph')
-		self.host 		= host
-		self.port 		= port
-		self.username 	= username
-		self.password 	= password
-		self.database	= database
+	  self.host 	= host
+	  self.port 	= port
+	  self.username = username
+	  self.password = password
+	  self.database	= database
 	end # end initialize
 
 	def connect
-		self.connection = Mysql2::Client.new(:host => self.host, :port => self.port, :username => self.username, :password => self.password, :database => self.database);
+	  self.connection = Mysql2::Client.new(:host => self.host, :port => self.port, :username => self.username, :password => self.password, :database => self.database);
 	end # end connect
 
 	def close 
-		self.connection.close
+	  self.connection.close
 	end
 
 	# Select
 	def get(sql)
-		begin
-			results = self.connection.query(sql)
-			resp	= Array.new
-			results.each do |row|
-			  resp.push(row)
-			end
-		rescue Mysql2::Error => e
-			raise e.message
-			# log errors in the future
+	  begin
+		results = self.connection.query(sql)
+		resp	= Array.new
+		results.each do |row|
+		  resp.push(row)
 		end
+	  rescue Mysql2::Error => e
+		raise e.message
+		# log errors in the future
+	  end
 
-		return resp
+	  return resp
 	end # end get
 
 	# Insert
 	def post(sql)
-		begin
-			results = self.connection.query(sql)
-			last_id = self.connection.last_id
-		rescue Mysql2::Error => e
-			raise e.message
-			nil
-		end
+	  begin
+		results = self.connection.query(sql)
+		last_id = self.connection.last_id
+	  rescue Mysql2::Error => e
+		raise e.message
+		nil
+	  end
 	end
 
 	# Update
 	def put(sql)
-		begin 
-			results 	= self.connection.query(sql)
-			num_rows 	= self.connection.affected_rows
-		rescue Mysql2::Error => e
-			raise e.message
-		end
+	  begin 
+		results 	= self.connection.query(sql)
+		num_rows 	= self.connection.affected_rows
+	  rescue Mysql2::Error => e
+		raise e.message
+	  end
 
-		if num_rows >= 1
-			return true
-		else
-			return false
-		end
+	  if num_rows >= 1
+		return true
+	  else
+		return false
+	  end
 	end
 
 	# Delete 
 	def delete(sql)
-		begin 
-			results 	= self.connection.query(sql)
-			num_rows 	= self.connection.affected_rows
-		rescue MySQL2::Error => e
-			raise e.message
-		end
+	  begin 
+		results 	= self.connection.query(sql)
+		num_rows 	= self.connection.affected_rows
+	  rescue MySQL2::Error => e
+		raise e.message
+	  end
 
-		if num_rows >= 1
-			return true
-		else
-			return false
-		end
+	  if num_rows >= 1
+		return true
+	  else
+		return false
+	  end
 	end
 
 end # end class
