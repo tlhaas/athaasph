@@ -5,7 +5,7 @@ class Customer
   attr_accessor :id, :givenname, :middlename, :surname, :birthdate, :addresses, :phone_numbers
 
   def initialize(options={})
-	self.id = options[:id]
+    self.id = options[:id]
 	self.givenname = options[:givenname]
 	self.middlename = options[:middlename]
 	self.surname = options[:surname]
