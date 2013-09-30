@@ -26,7 +26,7 @@ class Users
         user.password = row['password']	
         self.collection.push(user)
       end
-    rescue Mysql2::Error => e
+    rescue Exception => e
       raise e.message
     ensure 
       db.close
@@ -37,8 +37,8 @@ end # end class
 
 
 
-users = Users.new
-users.fetch
-users.collection.each do |user|
-  puts user.inspect
-end
+#users = Users.new
+#users.fetch
+#users.collection.each do |user|
+#  puts user.inspect
+#end

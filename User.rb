@@ -20,7 +20,6 @@ class User
 		db = MySQLDatabase.new()
 		db.connect
 		resp = db.get(sql)
-		db.close
 
 		resp.each do |row|
 		  self.id = resp[0]['id']
