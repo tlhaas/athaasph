@@ -14,4 +14,4 @@ Files
 * User: represents a person that will be accessing the API (eventually)
 * Users: a collection of User objects
 * Customer: business customers, but not necessarily users. This is tied to Jobs (estimate/work order/invoice).
-
+* Customers: a collection of Customer objects
