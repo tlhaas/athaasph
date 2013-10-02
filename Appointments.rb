@@ -19,21 +19,21 @@ class Appointments
       resp.each do |row|
         appt = Appointment.new
         appt.id = row['id']
-		appt.start = row['start']
-		appt.end = row['end']
-		appt.title = row['title']
-		appt.subject = row['subject']
-		appt.username = row['username']
+        appt.start = row['start']
+        appt.end = row['end']
+        appt.title = row['title']
+        appt.subject = row['subject']
+        appt.username = row['username']
 
-		self.collection.push(appt)
-	  end
-	rescue Exception => e
-	  raise e.message
-	ensure
-	  db.close
-	end
+        self.collection.push(appt)
+      end
+    rescue Exception => e
+      raise e.message
+    ensure
+      db.close
+    end
   end # end fetch
-  
+
 end
 
 #appts = Appointments.new
