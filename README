@@ -1,10 +1,14 @@
-09/28/13
+athaasph 
+========
 
-These are objects for my Hypermedia capstone project. They'll be used with a Sinatra server. 
+introduction 
+------------
 
-Originally everything was scripted on the server, but that got ugly fast. 
+* These are objects for my Hypermedia capstone project. They'll be used with a Sinatra server. 
 
-This is the official code refractor, starting from the bottom up.
+* Originally everything was scripted on the server, but that got ugly fast. 
+
+* This is the official code refractor, starting from the bottom up.
 
 
 Files
@@ -15,3 +19,5 @@ Files
 * Users: a collection of User objects
 * Customer: business customers, but not necessarily users. This is tied to Jobs (estimate/work order/invoice).
 * Customers: a collection of Customer objects
+* Appointment: an event on a calendar (side bar: WHY NOT CALL IT EVENT THEN?!?!@?!?!111!!!!)
+* Appointments: a collection of Appointment objects
