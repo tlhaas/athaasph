@@ -11,7 +11,7 @@ introduction
 * This is the official code refractor, starting from the bottom up.
 
 
-Files
+files
 ------
 
 * MySQLDatabase.rb: a real data layer using the mysql2 gem
@@ -21,3 +21,5 @@ Files
 * Customers: a collection of Customer objects
 * Appointment: an event on a calendar (side bar: WHY NOT CALL IT EVENT THEN?!?!@?!?!111!!!!)
 * Appointments: a collection of Appointment objects
+* Job: either an Estimate, Work Order, or Invoice.
+* Jobs: a collections of Job objects
