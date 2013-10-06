@@ -40,11 +40,11 @@ class MySQLDatabase
 	# Insert
 	def post(sql)
 	  begin
-		results = self.connection.query(sql)
-		last_id = self.connection.last_id
+			results = self.connection.query(sql)
+			last_id = self.connection.last_id
 	  rescue Mysql2::Error => e
-		raise e.message
-		nil
+			raise e.message
+			nil
 	  end
 	end
 

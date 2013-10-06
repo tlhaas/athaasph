@@ -1,29 +1,31 @@
 require "./MySQLDatabase"
+require "json"
 
 class Job
 
-  attr_accessor :id, :date, :customer_id, :addr_id, :job_type, :total, :memo, :givenname, :middlename, :surname, :street_1, :street_2, :city, :state, :zip, :country, :type, :line_items, :payments
+  attr_accessor :id, :date, :customer_id, :addr_id, :job_type, :total, :memo, :givenname, :middlename, :surname, :street_1, :street_2, :city, :state, :zip, :country, :type, :line_items, :payments, :links
 
   def initialize(options={})
-    self.id = options[:id]
-    self.date = options[:date]
-    self.customer_id = options[:customer_id]
-    self.addr_id = options[:addr_id]
-    self.job_type = options[:job_type]
-    self.total = options[:total]
-    self.memo = options[:memo]
-    self.givenname = options[:givenname]
-    self.middlename = options[:middlename]
-    self.surname = options[:surname]
-    self.street_1 = options[:street_1]
-    self.street_2 = options[:street_2]
-    self.city = options[:city]
-    self.state = options[:state]
-    self.zip = options[:zip]
-    self.country = options[:country]
-    self.type = options[:type]
-    self.line_items = options[:line_items]
-    self.payments = options[:payments]
+    self.id           = options[:id]
+    self.date         = options[:date]
+    self.customer_id  = options[:customer_id]
+    self.addr_id      = options[:addr_id]
+    self.job_type     = options[:job_type]
+    self.total        = options[:total]
+    self.memo         = options[:memo]
+    self.givenname    = options[:givenname]
+    self.middlename   = options[:middlename]
+    self.surname      = options[:surname]
+    self.street_1     = options[:street_1]
+    self.street_2     = options[:street_2]
+    self.city         = options[:city]
+    self.state        = options[:state]
+    self.zip          = options[:zip]
+    self.country      = options[:country]
+    self.type         = options[:type]
+    self.line_items   = options[:line_items]
+    self.payments     = options[:payments]
+    self.links        = Hash.new
   end
 
   def fetch
@@ -64,6 +66,12 @@ class Job
       resp = db.get(sql)
       self.payments = resp
 
+      self.links["home"]      = Hash["href" => "/"]
+      self.links["self"]      = Hash["href" => "/job/#{self.id}"]
+      self.links["edit"]      = Hash["href" => "/job/#{self.id}"]
+      self.links["delete"]    = Hash["href" =>"/job/#{self.id}"]
+      self.links["job_list"]  = Hash["href" =>"/job"]
+
     rescue Exception => e
       raise e.message
     ensure
@@ -94,6 +102,13 @@ class Job
         sql     = "INSERT INTO line_item (job_id, item_type, note, rate, rate_quantity, is_taxable) VALUES (\"#{self.id}\", \"#{item_type}\", \"#{note}\", \"#{rate}\", \"#{rate_quantity}\", \"#{is_taxable}\")"
         db.post(sql)  
       end
+
+      self.links["home"]      = Hash["href" => "/"]
+      self.links["self"]      = Hash["href" => "/job/#{self.id}"]
+      self.links["edit"]      = Hash["href" => "/job/#{self.id}"]
+      self.links["delete"]    = Hash["href" =>"/job/#{self.id}"]
+      self.links["job_list"]  = Hash["href" =>"/job"]
+
     rescue Exception => e
       raise e.message
     ensure
@@ -145,6 +160,42 @@ class Job
     end
   end
 
+  def to_hash
+    # attr_accessor :id, :date, :customer_id, :addr_id, :job_type, :total, :memo, :givenname, :middlename, :surname, 
+    # :street_1, :street_2, :city, :state, :zip, :country, :type, :line_items, :payments, :links
+    job = {
+      "_links" => self.links,
+      "id" => self.id,
+      "date" => self.date,
+      "customer_id" => self.customer_id,
+      "addr_id" => self.addr_id,
+      "job_type" => self.job_type,
+      "total" => self.total,
+      "memo" => self.memo,
+      "givenname" => self.givenname,
+      "middlename" => self.middlename,
+      "surname" => self.surname,
+      "street_1" => self.street_1,
+      "street_2" => self.street_2,
+      "city" => self.city,
+      "state" => self.state,
+      "zip" => self.zip,
+      "country" => self.country,
+      "type" => self.type,
+      "line_items" => self.line_items,
+      "payments" => self.payments,
+    }
+
+    # Delete null values
+    #job.each do |key,value|
+    #  job.delete(key) if value.nil?
+    #end
+  end # end to_hash
+
+  def to_hal
+    JSON.pretty_generate( self.to_hash )
+  end # end to_hal
+
 end # end class
 
 
@@ -192,6 +243,8 @@ job.post
 =begin
 job = Job.new(:id => 30)
 job.fetch
+
+puts job.to_hal
 =end
 
 # puts job.inspect

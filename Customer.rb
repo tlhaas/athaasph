@@ -1,17 +1,19 @@
 require "./MySQLDatabase"
+require "json"
 
 class Customer
   
-  attr_accessor :id, :givenname, :middlename, :surname, :birthdate, :addresses, :phone_numbers
+  attr_accessor :id, :givenname, :middlename, :surname, :birthdate, :addresses, :phone_numbers, :links
 
   def initialize(options={})
-    self.id = options[:id]
-    self.givenname = options[:givenname]
-    self.middlename = options[:middlename]
-    self.surname = options[:surname]
-    self.birthdate = options[:birthdate]
-    self.addresses = options[:addresses] 
-    self.phone_numbers = options[:phone_numbers]
+    self.id             = options[:id]
+    self.givenname      = options[:givenname]
+    self.middlename     = options[:middlename]
+    self.surname        = options[:surname]
+    self.birthdate      = options[:birthdate]
+    self.addresses      = options[:addresses] 
+    self.phone_numbers  = options[:phone_numbers]
+    self.links          = Hash.new
   end
 
   # formerly getCustomer
@@ -37,6 +39,13 @@ class Customer
       sql3 = "SELECT phone_number, type FROM phone where customer_id = '#{self.id}'"
       resp3 = db.get(sql3)
       self.phone_numbers = resp3
+
+      self.links["home"]          = Hash["href" => "/"]
+      self.links["self"]          = Hash["href" => "/customer/#{self.id}"]
+      self.links["edit"]          = Hash["href" => "/customer/#{self.id}"]
+      self.links["delete"]        = Hash["href" => "/customer/#{self.id}"]
+      self.links["customer_list"] = Hash["href" => "/customer"]
+
     rescue Exception => e
       raise e.message
     ensure
@@ -81,6 +90,12 @@ class Customer
           resp 	= db.post(sql) 
         end
       end
+
+      self.links["home"]          = Hash["href" => "/"]
+      self.links["self"]          = Hash["href" => "/customer/#{self.id}"]
+      self.links["edit"]          = Hash["href" => "/customer/#{self.id}"]
+      self.links["delete"]        = Hash["href" => "/customer/#{self.id}"]
+      self.links["customer_list"] = Hash["href" => "/customer"]
     rescue Exception => e
       raise e.message
     ensure
@@ -150,6 +165,23 @@ class Customer
     end 
   end # end delete
 
+  def to_hash
+    # :id, :givenname, :middlename, :surname, :birthdate, :addresses, :phone_numbers, :links
+    customer = {
+      "_links" => self.links,
+      "id" => self.id,
+      "givenname" => self.givenname,
+      "middlename" => self.middlename,
+      "surname" => self.surname,
+      "birthdate" => self.birthdate,
+      "addresses" => self.addresses,
+      "phone_numbers" => self.phone_numbers
+    }
+  end
+
+  def to_hal
+    JSON.pretty_generate( self.to_hash )
+  end
 end # Customer end
 
 # test for delete
@@ -178,7 +210,8 @@ customer.put
 =begin
 customer = Customer.new(:id => "1")
 customer.fetch
-puts customer.inspect
+puts customer.to_hal
+#puts customer.inspect
 =end
 
 # post test

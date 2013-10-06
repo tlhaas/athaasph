@@ -4,10 +4,15 @@ require "json"
 
 class Customers 
 
-  attr_accessor :collection 
+  attr_accessor :collection, :links
 
   def initialize
     self.collection = Array.new
+    self.links = {
+      "home"  => Hash["href" => "/"],
+      "self"  => Hash["href" => "/customer"],
+      "new"   => Hash["href" => "/customer"]
+    }
   end
 
   def fetch 
@@ -24,6 +29,11 @@ class Customers
         customer.middlename = row['middlename']
         customer.surname = row['surname']
         customer.birthdate = row['birthdate']
+        customer.links["home"]          = Hash["href" => "/"]
+        customer.links["self"]          = Hash["href" => "/customer/#{customer.id}"]
+        customer.links["edit"]          = Hash["href" => "/customer/#{customer.id}"]
+        customer.links["delete"]        = Hash["href" => "/customer/#{customer.id}"]
+        customer.links["customer_list"] = Hash["href" => "/customer"]
         self.collection.push(customer)
       end
     rescue Exception => e
@@ -33,8 +43,21 @@ class Customers
     end
   end # end fetch 
 
+  def to_hal
+    hashd_customers = Array.new
+    self.collection.each do |customer|
+      hashd_customers.push(customer.to_hash)
+    end
+    hal = Hash.new
+    hal["_links"] = self.links
+    hal["_embedded"] = { "customer" => hashd_customers }
+    JSON.pretty_generate( hal )
+
+  end
+
+
 end
 
 #customer_list = Customers.new
 #customer_list.fetch
-#puts customer_list.inspect
+#puts customer_list.to_hal
