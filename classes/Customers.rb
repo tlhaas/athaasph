@@ -1,5 +1,5 @@
-require "./MySQLDatabase"
-require "./Customer"
+require "./classes/MySQLDatabase"
+require "./classes/Customer"
 require "json"
 
 class Customers 

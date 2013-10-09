@@ -1,5 +1,5 @@
-require "./MySQLDatabase"
-require "./Appointment"
+require "./classes/MySQLDatabase"
+require "./classes/Appointment"
 
 class Appointments
   

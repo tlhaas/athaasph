@@ -1,4 +1,4 @@
-require "./MySQLDatabase"
+require "./classes/MySQLDatabase"
 require "json"
 
 class Customer
@@ -24,6 +24,10 @@ class Customer
       db.connect
       resp = db.get(sql)
 
+      if resp.empty?
+        raise "Customer not found!"
+      end
+      
       resp.each do |row|
         self.id = resp[0]['id']
         self.givenname = resp[0]['givenname']

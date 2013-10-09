@@ -1,5 +1,5 @@
 require "digest"
-require "./MySQLDatabase"
+require "./classes/MySQLDatabase"
 
 class User
 
@@ -21,6 +21,10 @@ class User
 			db = MySQLDatabase.new()
 			db.connect
 			resp = db.get(sql)
+
+			if resp.empty?
+				raise "User not found!"
+			end
 
 			resp.each do |row|
 		  	self.id = resp[0]['id']
@@ -192,11 +196,11 @@ end
 
 
 =begin
-	user = User.new(:id => "1")
+	user = User.new(:id => "8")
 	user.fetch()
-	puts user.to_hal
+	#puts user.to_hal
 rescue Exception => e
-	puts "Banana boobs"
+	puts e.message
 =end 
 
 

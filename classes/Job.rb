@@ -1,4 +1,4 @@
-require "./MySQLDatabase"
+require "./classes/MySQLDatabase"
 require "json"
 
 class Job
@@ -39,6 +39,10 @@ class Job
       db.connect
       resp = db.get(sql)
 
+      if resp.empty?
+        raise "Job not found!"
+      end
+      
       self.date = resp[0]['date']
       self.customer_id = resp[0]['customer_id']
       self.addr_id = resp[0]['addr_id']

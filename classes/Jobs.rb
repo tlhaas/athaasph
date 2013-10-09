@@ -1,5 +1,5 @@
-require "./Job"
-require "./MySQLDatabase"
+require "./classes/Job"
+require "./classes/MySQLDatabase"
 require "json"
 
 class Jobs
@@ -36,6 +36,11 @@ class Jobs
       db.connect
 
       resp = db.get(sql)
+
+      if resp.empty?
+        raise "No jobs found!"
+      end 
+
       resp.each do |row|
         job = Job.new
         job.id = row['id']

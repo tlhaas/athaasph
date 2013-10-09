@@ -1,4 +1,4 @@
-require "./MySQLDatabase"
+require "./classes/MySQLDatabase"
 require "json"
 
 class Appointment 
