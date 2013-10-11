@@ -14,6 +14,7 @@ introduction
 files
 ------
 
+* server.rb: This is transiting from v1 to v1, so disregard all the comments.
 * MySQLDatabase.rb: a real data layer using the mysql2 gem
 * User: represents a person that will be accessing the API (eventually)
 * Users: a collection of User objects
