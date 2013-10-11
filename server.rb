@@ -422,14 +422,12 @@ end
 #
 
 # get a new token
-get '/token' do
-  #request.body.rewind
-  #data = JSON.parse request.body.read
+post '/token' do
+  request.body.rewind
+  data = JSON.parse request.body.read
 
-  #username 	= data['username']
-  #password 	= data['password']
-  username    = params["username"]
-  password    = params["password"]
+  username 	= data['username']
+  password 	= data['password']
   ip_addr 	  = "#{request.ip}"
 
   begin
@@ -440,15 +438,6 @@ get '/token' do
   rescue Exception => e
     halt 404
   end
-
-=begin
-resp		= authenticate_user(username, password, ip_addr)
-if resp.nil?
-	halt 404
-end
-resp.to_json(JSON_FORMAT)
-=end 
-
 end
 
 =begin
