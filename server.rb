@@ -7,6 +7,7 @@ require './classes/Appointments'
 require './classes/Customers'
 require './classes/Jobs'
 require './classes/Users'
+require './classes/Token'
 
 # SSL
 # http://stackoverflow.com/questions/3696558/how-to-make-sinatra-work-over-https-ssl
@@ -284,7 +285,6 @@ get '/job' do
   rescue Exception => e
     halt 404
   end
-
 end
 
 
@@ -349,76 +349,109 @@ get '/job/:id' do
   end
 end
 
-=begin
+
 post '/job' do
 	
-	# need to turn line_items into a hash
-	#job 		= JSON.parse("#{params[:job]}")
 	request.body.rewind  # in case someone already read it
-  	job = JSON.parse request.body.read
-	
-	line_items 	= job["line_items"]
-	client_id	= job["client_id"]
-	client_addr = job["addr_id"]
-	date 		= job["date"]
-	total		= job["total"]
-	memo		= job["memo"]
-	job_type	= job["job_type"]
+  job = JSON.parse request.body.read
+  	line_items  = job["line_items"]
+    client_id   = job["client_id"]
+    client_addr = job["addr_id"]
+    date        = job["date"]
+    total       = job["total"]
+    memo        = job["memo"]
+    job_type    = job["job_type"]
 
-	resp = create_new_job( line_items, client_id, client_addr, date, total, memo, job_type )
+  options = {
+    :date => date,
+    :customer_id => client_id,
+    :addr_id => client_addr,
+    :total => total,
+    :memo => memo,
+    :job_type => job_type,
+    :line_items => line_items
+  }
 
-	resp.to_json(JSON_FORMAT)
+  begin
+    job = Job.new(options)
+    job.post
+    job.to_hal
+  rescue Exception => e
+    halt 404
+  end
+
 end
+
 
 put '/job/:id' do
-	#data = request.body.read
-	#params.inspect
-
 	request.body.rewind  # in case someone already read it
-  	job = JSON.parse request.body.read
+  job          = JSON.parse request.body.read
+	 job_id 		 = job["job_id"]
+	 customer_id = job["customer_id"]
+	 addr_id		 = job["addr_id"]
+	 date 		   = job["date"]
+	 total		   = job["total"]
+	 line_items  = job["line_items"]
+	 memo		     = job["memo"]
+	 job_type	   = job["job_type"]
+	 payments    = job["payments"]
 
-	#job 		= JSON.parse("#{params[:job]}")
-	job_id 		= job["job_id"]
-	customer_id = job["customer_id"]
-	addr_id		= job["addr_id"]
-	date 		= job["date"]
-	total		= job["total"]
-	line_items  = job["line_items"]
-	memo		= job["memo"]
-	job_type	= job["job_type"]
-	payments 	= job["payments"]
-
-	resp = update_job( job_id, customer_id, addr_id, date, total, line_items, memo, job_type, payments )
-
-	if resp == nil
-		status 400
-	else
-		status 204
-	end
-	#resp.to_json(JSON_FORMAT)
+  begin
+    options = {
+      :id => job_id,
+      :customer_id => customer_id,
+      :addr_id => addr_id,
+      :date => date,
+      :total => total,
+      :line_items => line_items,
+      :memo => memo,
+      :job_type => job_type,
+      :payments => payments
+    }
+    job = Job.new(options)
+    job.put
+    status 204
+  rescue Exception => e
+    e.message.to_json
+  end
 end
+
 
 #
 # Token
 #
 
 # get a new token
-post '/token' do
-	request.body.rewind
-	data = JSON.parse request.body.read
+get '/token' do
+  #request.body.rewind
+  #data = JSON.parse request.body.read
 
-	username 	= data['username']
-	password 	= data['password']
-	ip_addr 	= "#{request.ip}"
+  #username 	= data['username']
+  #password 	= data['password']
+  username    = params["username"]
+  password    = params["password"]
+  ip_addr 	  = "#{request.ip}"
 
-	resp		= authenticate_user(username, password, ip_addr)
+  begin
+    token = Token.new(username, password, ip_addr)
+    token.encode
+    das_token = token.to_s
+    das_token.to_json
+  rescue Exception => e
+    halt 404
+  end
 
-	if resp.nil?
-		halt 404
-	end
-	resp.to_json(JSON_FORMAT)
+=begin
+resp		= authenticate_user(username, password, ip_addr)
+if resp.nil?
+	halt 404
+end
+resp.to_json(JSON_FORMAT)
+=end 
+
 end
 
+=begin
 # valid a token you have
 get '/token/:the_token' do
 	token 	= "#{params[:the_token]}"

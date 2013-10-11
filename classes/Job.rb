@@ -114,53 +114,58 @@ class Job
       self.links["job_list"]  = Hash["href" =>"/job"]
 
     rescue Exception => e
-      raise e.message
+      raise e.stacktrace
     ensure
       db.close
     end
   end
 
   def put
-    sql = "UPDATE job SET date='#{self.date}', customer_id='#{self.customer_id}', addr_id='#{self.addr_id}', job_type='#{self.job_type}', total='#{self.total}', last_updated='#{Time.now.to_i}', memo='#{self.memo}' WHERE id = '#{self.id}'"
-    db = MySQLDatabase.new
-    db.connect
+    begin
+      sql = "UPDATE job SET date='#{self.date}', customer_id='#{self.customer_id}', addr_id='#{self.addr_id}', job_type='#{self.job_type}', total='#{self.total}', last_updated='#{Time.now.to_i}', memo='#{self.memo}' WHERE id = '#{self.id}'"
+      db = MySQLDatabase.new
+      db.connect
 
-    updated = db.put(sql)
+      updated = db.put(sql)
 
-    if updated
-      sql = "DELETE FROM line_item WHERE job_id = '#{self.id}'"
-      deleted_line_items = db.delete(sql)
+      if updated
+        sql = "DELETE FROM line_item WHERE job_id = '#{self.id}'"
+        deleted_line_items = db.delete(sql)
 
-      if deleted_line_items
-        self.line_items.each do |line_item|
-          item_type     = line_item["item_type"]
-          note          = line_item["note"]
-          rate          = line_item["rate"]
-          rate_quantity = line_item["rate_quantity"]
-          is_taxable    = line_item["is_taxable"]
+        if deleted_line_items
+          self.line_items.each do |line_item|
+            item_type     = line_item["item_type"]
+            note          = line_item["note"]
+            rate          = line_item["rate"]
+            rate_quantity = line_item["rate_quantity"]
+            is_taxable    = line_item["is_taxable"]
 
-          sql     = "INSERT INTO line_item (job_id, item_type, note, rate, rate_quantity, is_taxable) VALUES (\"#{self.id}\", \"#{item_type}\", \"#{note}\", \"#{rate}\", \"#{rate_quantity}\", \"#{is_taxable}\")"
-          db.put(sql)  
+            sql     = "INSERT INTO line_item (job_id, item_type, note, rate, rate_quantity, is_taxable) VALUES (\"#{self.id}\", \"#{item_type}\", \"#{note}\", \"#{rate}\", \"#{rate_quantity}\", \"#{is_taxable}\")"
+            db.put(sql)  
+          end
+        end
+
+        if self.payments.length > 0
+          sql = "DELETE FROM payment WHERE job_id='#{self.id}'"
+          deleted_payments = db.delete(sql)
+
+          if deleted_payments
+            payments.each do |payment|
+              type  = payment['type']
+              amount  = payment['amount']
+              date    = payment['date']
+              note  = payment['note']
+
+              sql = "INSERT INTO payment (job_id, type, amount, date, note) VALUE (\"#{self.id}\", \"#{type}\", \"#{amount}\", \"#{date}\", \"#{note}\")"
+              db.put(sql)
+            end # end payments insert loop
+          end 
         end
       end
-
-      if self.payments.length > 0
-        sql = "DELETE FROM payment WHERE job_id='#{self.id}'"
-        deleted_payments = db.delete(sql)
-
-        if deleted_payments
-          payments.each do |payment|
-            type  = payment['type']
-            amount  = payment['amount']
-            date    = payment['date']
-            note  = payment['note']
-
-            sql = "INSERT INTO payment (job_id, type, amount, date, note) VALUE (\"#{self.id}\", \"#{type}\", \"#{amount}\", \"#{date}\", \"#{note}\")"
-            db.put(sql)
-          end # end payments insert loop
-        end 
-      end
-
+    rescue Exception => e
+      raise e.message
+    ensure
+      db.close
     end
   end
 
