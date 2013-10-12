@@ -65,42 +65,46 @@ get "/appointment" do
 
   appts = Appointments.new
   appts.fetchVerbose(start,finish)
-  
-	if appts.collection.length > 0
-    appts.to_hal
-  else
-	  halt 404
-	end
+  appts.to_hal
 end
 
-=begin
 post "/appointment" do
-	current_time = Time.now.to_i*1000
+  begin
+  	current_time = Time.now.to_i*1000
 
-	token = request.env['HTTP_AUTHORIZATION']
-	token = Token.new(token)
-	token.decode
-	
-	request.body.rewind  # in case someone already read it
-	appt 		= JSON.parse request.body.read	
-  	title 		= appt['title']
-  	subject 	= appt['subject']
-  	start 		= appt['start']
-  	finish 		= appt['end']
-  	username 	= token.username
+  	#token = request.env['HTTP_AUTHORIZATION']
+  	#token = Token.new(token)
+  	#token.decode
+  	
+  	request.body.rewind  # in case someone already read it
+  	appt 		= JSON.parse request.body.read	
+    	title 		= appt['title']
+    	subject 	= appt['subject']
+    	start 		= appt['start']
+    	finish 		= appt['end']
+    	username 	= "jones" # token.username
 
-  	if start <= current_time
-  		msg = Hash["message" => "You can't make make a reservation in the past."]
-  		halt 409, Hash["error" => msg].to_json
-  	else
-		resp = create_appointment(title, subject, start, finish, username)
-	end
+    options = {
+      :start => start,
+      :end => finish,
+      :title => title,
+      :subject => subject,
+      :username => username
+    }
 
-	resp.to_json(JSON_FORMAT)
-
+    if start <= current_time
+    	msg = Hash["message" => "You can't make make a reservation in the past."]
+    	halt 409, Hash["error" => msg].to_json
+    else
+      new_appoinment = Appointment.new(options)
+      new_appoinment.post
+      new_appoinment.to_hal
+  	end
+  rescue Exception => e
+    halt 404
+  end
 end 
 
-=end 
 #
 # User
 #
@@ -125,83 +129,96 @@ get '/user/:id/?' do
   end
 end
 
-=begin
+
 patch '/user/:id' do
 	halt 415 unless request.media_type == "application/json-patch+json"
 
 	request.body.rewind  # in case someone already read it
-  	data = JSON.parse request.body.read
-  	add = data['add']
-  	val = data['value']
+	data = JSON.parse request.body.read
+	add = data['add']
+	val = data['value']
 
-  	if data['add']
-  		return "You wanna add something!? #{val}"
-  	elsif data['remove']
-  		return "You wanna remove something?! #{val}"
-  	elsif data['replace']
-
-  		
-  		if /password/.match(data['replace'])
-  			hashed_password = Digest::SHA1.hexdigest(val)	
-  			resp = update_password(hashed_password, "#{params[:id]}")
-  			if resp.nil? || resp == 0
-  				halt 400
-  			else
-  				status 204
-  			end
-  		elsif /username/.match(data['replace'])
-  			resp = update_username(val, "#{params[:id]}")
-  			if resp.nil? || resp == 0
-  				halt 400
-  			else
-  				status 204
-  				# could return 200 and updated Resource too
-  				#headers \
-  				#	"Location" => "http://localhost:4567/user/#{params[:id]}"
-  			end
-  		elsif /auth/.match(data['replace'])
-  			resp = update_auth(val, "#{params[:id]}")
-  			if resp.nil? || resp == 0
-  				halt 400
-  			else
-  				status 204
-  			end
-  		else
-  			# you're trying to replace something that doesn't exist
-  			halt 400  			
-  		end
-  	elsif data['move']
-  		return "You wanna move something!? #{val}"
-  	elsif data['test']
-  		return "You wanna test something!? #{val}"
-  	end	
+	if data['add']
+		return "You wanna add something!? #{val}"
+	elsif data['remove']
+		return "You wanna remove something?! #{val}"
+	elsif data['replace']	
+		if /password/.match(data['replace'])
+      
+      begin
+        options = Hash[:id => "#{params[:id]}", :password => val]
+        user = User.new(options)
+        user.update_password
+        status 204
+      rescue Exception => e
+        halt 409
+      end
+		elsif /username/.match(data['replace'])
+      begin 
+        options = Hash[:id => "#{params[:id]}", :username => val]
+        user = User.new(options)
+        user.update_username
+        status 204
+      rescue Exception => e
+        halt 409
+      end
+		elsif /auth/.match(data['replace'])
+      begin 
+        options = Hash[:id => "#{params[:id]}", :auth => val]
+        user = User.new(options)
+        user.update_auth
+        status 204
+      rescue Exception => e
+        halt 409
+      end
+		else
+			# you're trying to replace something that doesn't exist
+			halt 400  			
+		end
+	elsif data['move']
+		return "You wanna move something!? #{val}"
+	elsif data['test']
+		return "You wanna test something!? #{val}"
+	end	
 end
 
 post '/user' do 
 	request.body.rewind  # in case someone already read it
-  	data = JSON.parse request.body.read
-  	username = data['username']
-  	password = data['password']
-  	cust_id  = data['customer_id']
-  	auth   	 = data['auth']
+  data = JSON.parse request.body.read
+  username = data['username']
+  password = data['password']
+  cust_id  = data['customer_id']
+  auth   	 = data['auth']
 
-  	resp = create_user(username, password, cust_id, auth)
-  	if resp.nil?
-  		halt 404
-  	else
-  		resp.to_json(JSON_FORMAT)
-  	end
+  user_deets = {
+    :username => username,
+    :password => password,
+    :auth     => auth
+  }
+
+  begin 
+    user = User.new(user_deets)
+    user.post()
+    user.to_hal
+  rescue Exception => e
+    halt 409
+  end
+  
 end
 
 delete '/user/:id' do
-	resp = delete_user("#{params[:id]}")
-	if resp.nil?
-		halt 4040
-	else
-		status 204
-	end
+  begin
+    user = User.new(:id => "#{params[:id]}")
+    if (user.delete)
+      status 204
+    else
+      status 409
+    end
+  rescue Exception => e
+    halt 404
+  end
 end
-=end 
+
 #
 # Customer
 #
@@ -228,42 +245,61 @@ get '/customer/:id/?' do
   end
 end
 
-=begin
 post '/customer' do 
+  begin
+    request.body.rewind  # in case someone already read it
+    customer      = JSON.parse request.body.read
+    givenname     = customer["givenname"]
+    middlename    = customer["middlename"]
+    surname       = customer["surname"]
+    phone_numbers = customer["phone_numbers"]
+    addresses     = customer["addresses"]
 
-	#customer 		= JSON.parse("#{params[:customer]}")
-	request.body.rewind  # in case someone already read it
-  	customer = JSON.parse request.body.read
-	givenname 		= customer["givenname"]
-	middlename 		= customer["middlename"]
-	surname 		= customer["surname"]
-    phone_numbers 	= customer["phone_numbers"]
-    addresses  		= customer["addresses"]
+    options = {
+      :givenname => givenname,
+      :middlename => middlename,
+      :surname => surname,
+      :addresses => addresses,
+      :phone_numbers => phone_numbers
+    }
 
-    resp = create_customer(givenname, middlename, surname, phone_numbers, addresses)
-    resp.to_json(JSON_FORMAT)
+    new_customer = Customer.new(options)
+    new_customer.post
+    new_customer.to_hal
+  rescue Exception => e
+    halt 404
+  end
+	
 end
 
 put '/customer/:id' do
-	request.body.rewind  # in case someone already read it
-  	customer = JSON.parse request.body.read
-	#customer 		= JSON.parse("#{params[:customer]}")
-	customer_id 	= customer["id"]
-	givenname 		= customer["givenname"]
-	middlename 		= customer["middlename"]
-	surname 		= customer["surname"]
-    phone_numbers 	= customer["phone_numbers"]
-    addresses  		= customer["addresses"]
+  begin	
+    request.body.rewind  # in case someone already read it
+    customer = JSON.parse request.body.read
 
-    resp = update_customer(customer_id, givenname, middlename, surname, phone_numbers, addresses)
-	
-	if resp == nil
-		status 400
-	else
-		status 204
-	end
+  	customer_id 	= customer["id"]
+  	givenname 		= customer["givenname"]
+  	middlename 		= customer["middlename"]
+  	surname 		  = customer["surname"]
+    phone_numbers = customer["phone_numbers"]
+    addresses  	  = customer["addresses"]
+
+    options = {
+      :id            => customer_id,
+      :givenname     => givenname,
+      :middlename    => middlename,
+      :surname       => surname,
+      :addresses     => addresses,
+      :phone_numbers => phone_numbers
+    }
+    customer = Customer.new(options)
+    customer.put
+    status 204
+  rescue Exception => e
+    halt 400
+  end
 end
-=end
+
 
 #
 # Job
@@ -440,17 +476,16 @@ post '/token' do
   end
 end
 
-=begin
-# valid a token you have
+# validate a token you have
 get '/token/:the_token' do
-	token 	= "#{params[:the_token]}"
+	#token 	= "#{params[:the_token]}"
 	
-  	resp = authenticate_token(token)
-
-	if resp.nil?
-		halt 404
-	end
-	resp.to_json(JSON_FORMAT)
+	token = Token.new(params[:the_token])
+  token.decode
+  
+  if (token.username.nil? || token.auth.nil? || token.timestamp.nil? || token.ip_addr.nil?)
+    halt 404
+  else
+    token.to_hal
+  end
 end
-
-=end

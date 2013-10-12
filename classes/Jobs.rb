@@ -17,9 +17,9 @@ class Jobs
         "proposals"   => Hash["href" => "/job/proposals"],
         "work_orders" => Hash["href" => "/job/work_orders"],
         "invoices"    => Hash["href" => "/job/invoices"],
-        "all"         => Hash["href" => "/job"]
-      },
-      "template" => Hash["href" => "/job/{id}"]
+        "all"         => Hash["href" => "/job"],
+        "item"        => Hash["href" => "/job/{id}"]
+      }
     }
   end
 

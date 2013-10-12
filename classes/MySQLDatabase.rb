@@ -51,32 +51,32 @@ class MySQLDatabase
 	# Update
 	def put(sql)
 	  begin 
-		results 	= self.connection.query(sql)
-		num_rows 	= self.connection.affected_rows
+			results 	= self.connection.query(sql)
+			num_rows 	= self.connection.affected_rows
 	  rescue Mysql2::Error => e
-		raise e.message
+			raise e.message
 	  end
 
 	  if num_rows >= 1
-		return true
+			return true
 	  else
-		return false
+			return false
 	  end
 	end
 
 	# Delete 
 	def delete(sql)
 	  begin 
-		results 	= self.connection.query(sql)
-		num_rows 	= self.connection.affected_rows
+			results 	= self.connection.query(sql)
+			num_rows 	= self.connection.affected_rows
 	  rescue MySQL2::Error => e
-		raise e.message
+			raise e.message
 	  end
 
 	  if num_rows >= 1
-		return true
+			return true
 	  else
-		return false
+			return false
 	  end
 	end
 

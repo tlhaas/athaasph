@@ -127,7 +127,7 @@ class User
 			sql = "DELETE FROM user WHERE id='#{id}'"
 			db = MySQLDatabase.new()
 			db.connect
-			num_rows_affected = db.delete(sql)
+			is_deleted = db.delete(sql)
 	  rescue Exception => e
 			raise e.message
 	  ensure

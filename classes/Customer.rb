@@ -141,7 +141,10 @@ class Customer
           sql = "INSERT INTO address (customer_id, street_1, street_2, city, state, zip, country, type) VALUES (\"#{self.id}\",\"#{street_1}\",\"#{street_2}\",\"#{city}\",\"#{state}\",\"#{zip}\",\"#{country}\",\"#{type}\")"
           num_rows = db.put(sql)	  
         end
+      else
+        raise "Customer not found!"
       end # if end
+
     rescue Exception => e
       raise e.message
     ensure 
@@ -212,7 +215,7 @@ customer.put
 
 # fetch test
 =begin
-customer = Customer.new(:id => "1")
+customer = Customer.new(:id => "18")
 customer.fetch
 puts customer.to_hal
 #puts customer.inspect

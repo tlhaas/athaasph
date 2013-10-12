@@ -9,9 +9,12 @@ class Customers
   def initialize
     self.collection = Array.new
     self.links = {
-      "home"  => Hash["href" => "/"],
-      "self"  => Hash["href" => "/customer"],
-      "new"   => Hash["href" => "/customer"]
+      "home"    => Hash["href" => "/"],
+      "self"    => Hash["href" => "/customer"],
+      "new"     => Hash["href" => "/customer"],
+      "filters" => {
+        "item"        => Hash["href" => "/customer/{id}"]
+      }
     }
   end
 
