@@ -1,16 +1,21 @@
 require 'mysql2'
 require 'digest'
+require 'uri'
 
 class MySQLDatabase
 
 	attr_accessor :host, :port, :username, :password, :database, :connection
 
-	def initialize(host='127.0.0.1', port=8889, username='root', password='root', database='athaasph')
-	  self.host 	= host
-	  self.port 	= port
-	  self.username = username
-	  self.password = password
-	  self.database	= database
+	# mysql2://[username]:[password]@[host]:[port]/[database name]?reconnect=true
+	# mysql2://root:root@127.0.0.1:8889/athaasph?reconnect=true
+	def initialize()
+		db = URI.parse(ENV['CLEARDB_DATABASE_URL'])	# this is a local ENV var. It's also set up on Heroku as wellc
+  	db_name = db.path.gsub(/^\//, '')	
+	  self.host 	= db.host
+	  self.port 	= db.port
+	  self.username = db.user
+	  self.password = db.password
+	  self.database	= db_name
 	end # end initialize
 
 	def connect
@@ -87,13 +92,20 @@ end # end class
 #
 
 # Let's try it out now
+
 =begin
 db 		= MySQLDatabase.new()
 db.connect
+
+
 	
 	resp 	= db.get("SELECT max(id) as max_id FROM user")
 	next_id = resp[0]["max_id"] + 1
+	puts next_id
 
+db.close
+=end
+=begin
 	username		= "Fat Tits 4.0"
 	hashed_password = Digest::SHA1.hexdigest("sandynips")
 	auth 			= "admin"
